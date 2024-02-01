@@ -50,12 +50,12 @@
         <!-- Добавьте необходимое количество полей ввода по аналогии -->
     </div>
     <div class="button-group"></div>
-    <!-- <button type="button" onclick="addExercise()">Добавить упражнение</button>
-    <button type="button" onclick="saveToCSV()">Сохранить в CSV</button> -->
     <button type="button" onclick="saveToSQLite()">Сохранить в SQLite</button>
     <button type="button" onclick="getFromSQLite()">Получить из SQLite</button>
-    </div> <!-- Закрывающий тег div для button-group -->
+    </div>
 </form>
+
+
 
 <script>
   
@@ -148,8 +148,8 @@
     }
 }
 
-    async function getFromSQLite(){
-        fetch('/get_data')
+async function getFromSQLite() {
+    fetch('/get_data')
         .then(response => response.json())
         .then(data => {
             const dataTableBody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
@@ -163,32 +163,172 @@
                 const dateCell = row.insertCell(3);
                 const actionCell = row.insertCell(4);
 
+                // Установим атрибуты данных для ячеек
+                idCell.dataset.id = exercise.id;
+                idCell.dataset.field = 'id';
+                nameCell.dataset.id = exercise.id;
+                nameCell.dataset.field = 'name';
+                setsRepsCell.dataset.id = exercise.id;
+                setsRepsCell.dataset.field = 'setsReps';
+                dateCell.dataset.id = exercise.id;
+                dateCell.dataset.field = 'date';
+
                 idCell.textContent = exercise.id;
-                nameCell.textContent = exercise.exercise_name;
-                setsRepsCell.textContent = exercise.sets_reps;
-                dateCell.textContent = exercise.date;
+                // Создание div для значения и добавление в ячейку
+                const nameValueDiv = document.createElement('div');
+                nameValueDiv.textContent = exercise.exercise_name;
+                nameCell.appendChild(nameValueDiv);
+
+                const setsRepsValueDiv = document.createElement('div');
+                setsRepsValueDiv.textContent = exercise.sets_reps;
+                setsRepsCell.appendChild(setsRepsValueDiv);
+
+                const dateValueDiv = document.createElement('div');
+                dateValueDiv.textContent = exercise.date;
+                dateCell.appendChild(dateValueDiv);
 
                 // Добавление кнопок "Edit" и "Delete"
+                const actionButtonsDiv = document.createElement('div');
+                actionButtonsDiv.classList.add('actionButtons');
+
                 const editButton = document.createElement('button');
                 editButton.textContent = 'Edit';
-                editButton.addEventListener('click', () => editExercise(exercise));
+                editButton.addEventListener('click', () => showEditForm(exercise));
 
                 const deleteButton = document.createElement('button');
                 deleteButton.textContent = 'Delete';
                 deleteButton.addEventListener('click', () => deleteExercise(exercise));
+                
+                actionButtonsDiv.appendChild(editButton);
+                actionButtonsDiv.appendChild(deleteButton);
 
-                actionCell.appendChild(editButton);
-                actionCell.appendChild(deleteButton);
+                actionCell.appendChild(actionButtonsDiv);
+
+
+
+                // Создание div для поля ввода и добавление в ячейку
+
+                const editNameInput = document.createElement('input');
+                editNameInput.type = 'text';
+                editNameInput.value = exercise.exercise_name;
+                editNameInput.style.display = 'none';
+   
+
+
+                const editSetsRepsInput = document.createElement('input');
+                editSetsRepsInput.type = 'text';
+                editSetsRepsInput.value = exercise.sets_reps;
+                editSetsRepsInput.style.display = 'none';
+ 
+
+                
+                const editDateInput = document.createElement('input');
+                editDateInput.type = 'text';
+                editDateInput.value = exercise.date;
+                editDateInput.style.display = 'none';
+
+
+                const editButtonsDiv = document.createElement('div');
+                editButtonsDiv.classList.add('editButtons');
+                editButtonsDiv.style.display = 'none';
+                const saveButton = document.createElement('button');
+                saveButton.textContent = 'Save';
+                saveButton.addEventListener('click', () => updateExercise(exercise));
+
+                const cancelButton = document.createElement('button');
+                cancelButton.textContent = 'Cancel';
+                cancelButton.addEventListener('click', () => hideEditForm(exercise));
+
+                nameCell.appendChild(editNameInput);
+                setsRepsCell.appendChild(editSetsRepsInput);
+                dateCell.appendChild(editDateInput);
+
+                editButtonsDiv.appendChild(saveButton);
+                editButtonsDiv.appendChild(cancelButton);
+                actionCell.appendChild(editButtonsDiv);
+
+
+
             });
         })
         .catch(error => {
             console.error('Error fetching data:', error);
         });
-    }
-    // Функция для редактирования упражнения
-function editExercise(exercise) {
-    // Ваш код для редактирования упражнения, например, заполнение формы редактирования
 }
+
+function showEditForm(exercise) {
+    console.log('showEditForm');
+    const nameCell = document.querySelector(`#data-table td[data-id='${exercise.id}'][data-field='name']`);
+    const setsRepsCell = document.querySelector(`#data-table td[data-id='${exercise.id}'][data-field='setsReps']`);
+    const dateCell = document.querySelector(`#data-table td[data-id='${exercise.id}'][data-field='date']`);
+
+    const editNameInput = nameCell.querySelector('input');
+    const editSetsRepsInput = setsRepsCell.querySelector('input');
+    const editDateInput = dateCell.querySelector('input');
+
+    editNameInput.style.display = 'inline';
+    editSetsRepsInput.style.display = 'inline';
+    editDateInput.style.display = 'inline';
+
+    const divName = nameCell.querySelector('div');
+    const divSetsReps = setsRepsCell.querySelector('div');
+    const divDate = dateCell.querySelector('div');
+
+    divName.style.display = 'none';
+    divSetsReps.style.display = 'none';
+    divDate.style.display = 'none';
+
+    const divButtonsEdit = document.querySelector('.editButtons');
+    divButtonsEdit.style.display = 'block';
+
+    const divActionsButtons = document.querySelector('.actionButtons');
+    divActionsButtons.style.display = 'none';
+
+}
+
+function hideEditForm(exercise) {
+    const nameCell = document.querySelector(`#data-table td[data-id='${exercise.id}'][data-field='name']`);
+    const setsRepsCell = document.querySelector(`#data-table td[data-id='${exercise.id}'][data-field='setsReps']`);
+    const dateCell = document.querySelector(`#data-table td[data-id='${exercise.id}'][data-field='date']`);
+
+    const editNameInput = nameCell.querySelector('input');
+    const editSetsRepsInput = setsRepsCell.querySelector('input');
+    const editDateInput = dateCell.querySelector('input');
+
+    editNameInput.style.display = 'none';
+    editSetsRepsInput.style.display = 'none';
+    editDateInput.style.display = 'none';
+
+    const divName = nameCell.querySelector('div');
+    const divSetsReps = setsRepsCell.querySelector('div');
+    const divDate = dateCell.querySelector('div');
+
+    divName.style.display = 'block';
+    divSetsReps.style.display = 'block';
+    divDate.style.display = 'block';
+
+    const divButtonsEdit = document.querySelector('.editButtons');
+    divButtonsEdit.style.display = 'none';
+
+    const divActionsButtons = document.querySelector('.actionButtons');
+    divActionsButtons.style.display = 'block';
+
+
+
+}
+
+function updateExercise(exercise) {
+    // Добавьте код для отправки данных на сервер и обновления строки в таблице
+    // ...
+
+    console.log('Exercise updated successfully.');
+
+    hideEditForm(exercise); // Скрыть форму после обновления
+    // Здесь укажите id соответствующей строки, которую нужно отобразить
+    // document.getElementById(`exerciseRow${exerciseId}`).style.display = 'table-row';
+    getFromSQLite(); // Обновите таблицу после обновления
+}
+
 
 // Функция для удаления упражнения
 function deleteExercise(exercise) {

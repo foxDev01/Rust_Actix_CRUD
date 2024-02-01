@@ -87,7 +87,7 @@ async fn delete_exercise(id: web::Path<i32>) -> HttpResponse {
         // Обработка ошибки удаления, например, отправка 500 Internal Server Error
         return HttpResponse::InternalServerError().body(format!("Failed to delete exercise: {}", e));
     }
-
+ 
     // Успешный ответ
     HttpResponse::Ok().json(json!({"message": "Exercise deleted successfully"}))
 }
