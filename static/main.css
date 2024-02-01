@@ -1,0 +1,77 @@
+/* styles.css */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column-reverse;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+h2 {
+    text-align: center;
+}
+
+form {
+    display: flex;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.exercise-group {
+    display: flex;
+    margin-bottom: 0px;
+}
+
+label {
+    display: block;
+    margin-bottom: 8px;
+    margin-top: 7px;
+}
+
+.set-inputs {
+    display: flex;
+    margin-bottom: 0px;
+}
+
+.set-weight,
+.set-repetitions {
+    width: 50px;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 5px; /* Добавлено для отступа между полями ввода */
+}
+
+button {
+    background-color: #4caf50;
+    color: #fff;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+.vl {
+    border-right: 2px solid green;
+    margin-right: 4px;
+    height: 15px;
+    margin-top: 9px;
+   
+  }
+
+  .v2 {
+    border-right: 5px solid rgb(9, 68, 195);
+    margin-right: 5px;
+   
+  }

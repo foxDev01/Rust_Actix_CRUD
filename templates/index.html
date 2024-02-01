@@ -1,0 +1,166 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Добавление упражнения</title>
+    <link rel="stylesheet" href="/static/main.css">
+</head>
+<body>
+
+    <div>
+
+        <h1>SQLite Data</h1>
+    <table id="data-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Exercise Name</th>
+                <th>Sets and Reps</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Table rows will be added dynamically -->
+        </tbody>
+    </table>
+
+
+    </div>
+
+<form id="exerciseForm">
+    <div class="exercise-group">
+        <label for="exerciseName">Название упражнения:</label>
+        <input type="text" id="exerciseName" name="exerciseName" required>
+    
+        <label for="exerciseSets">вес/кол-во:</label>
+        <div class="set-inputs">
+            <input type="number" class="set-weight" name="setWeight1" required>
+            <div class="vl"></div>
+            <input type="number" class="set-repetitions" name="setRepetitions1" required>
+        </div>
+        <div class="v2"></div>
+        <div class="set-inputs">
+            <input type="number" class="set-weight" name="setWeight2" required>
+            <div class="vl"></div>
+            <input type="number" class="set-repetitions" name="setRepetitions2" required>
+        </div>
+        <!-- Добавьте необходимое количество полей ввода по аналогии -->
+    </div>
+    <div class="button-group"></div>
+    <!-- <button type="button" onclick="addExercise()">Добавить упражнение</button>
+    <button type="button" onclick="saveToCSV()">Сохранить в CSV</button> -->
+    <button type="button" onclick="saveToSQLite()">Сохранить в SQLite</button>
+    <button type="button" onclick="getFromSQLite()">Получить из SQLite</button>
+    </div> <!-- Закрывающий тег div для button-group -->
+</form>
+
+<script>
+    function addExercise() {
+        var exerciseName = document.querySelector('input[name="exerciseName"]');
+        var setWeight1 = document.querySelector('input[name="setWeight1"]');
+        var setRepetitions1 = document.querySelector('input[name="setRepetitions1"]');
+        var setWeight2 = document.querySelector('input[name="setWeight2"]');
+        var setRepetitions2 = document.querySelector('input[name="setRepetitions2"]');
+
+        var setsData = [];
+
+        setsData.push({ exerciseName: exerciseName.value, p1: [setWeight1.value , setRepetitions1.value], p2: [setWeight2.value , setRepetitions2.value] });
+
+        console.log(setsData);
+
+        // Очистим поля формы после добавления.
+        document.getElementById("exerciseForm").reset();
+    }
+
+    async function saveToCSV() {
+        var exerciseName = document.querySelector('input[name="exerciseName"]');
+        var setWeight1 = document.querySelector('input[name="setWeight1"]');
+        var setRepetitions1 = document.querySelector('input[name="setRepetitions1"]');
+        var setWeight2 = document.querySelector('input[name="setWeight2"]');
+        var setRepetitions2 = document.querySelector('input[name="setRepetitions2"]');
+
+        // Проверка наличия элементов перед чтением свойства 'value'
+        if (exerciseName && setWeight1 && setRepetitions1 && setWeight2 && setRepetitions2) {
+            var requestData = {
+                content: exerciseName.value + ": " + `{${setWeight1.value},${setRepetitions1.value}} {${setWeight2.value},${setRepetitions2.value}}`
+            };
+
+            fetch('/save_csv', {
+                method: 'POST',
+                body: JSON.stringify(requestData),
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.text())
+            .then(text => alert(text))
+            .catch(error => console.error('Error:', error));
+        } else {
+            console.error('One or more elements not found');
+        }
+    }
+    async function saveToSQLite() {
+    var exerciseName = document.querySelector('input[name="exerciseName"]');
+    var setWeight1 = document.querySelector('input[name="setWeight1"]');
+    var setRepetitions1 = document.querySelector('input[name="setRepetitions1"]');
+    var setWeight2 = document.querySelector('input[name="setWeight2"]');
+    var setRepetitions2 = document.querySelector('input[name="setRepetitions2"]');
+    
+
+    // Check the existence of elements before reading the 'value' property
+    if (exerciseName && setWeight1 && setRepetitions1 && setWeight2 && setRepetitions2) {
+        var requestData = {
+            id: 123 ,
+            exercise_name: exerciseName.value,
+            sets_reps:  parseInt(setWeight1.value)+ "/" + parseInt(setRepetitions1.value) + "," +
+                        parseInt(setWeight2.value)+ "/" + parseInt(setRepetitions2.value),
+            
+            date: "2024-01-21" // You may need to dynamically set the date
+        };
+
+        fetch('/save_sqlite', {
+            method: 'POST',
+            body: JSON.stringify(requestData),
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+        .then(response => response.text())
+        .then(text => alert(text))
+        .catch(error => console.error('Error:', error));
+    } else {
+        console.error('One or more elements not found');
+    }
+}
+
+    async function getFromSQLite(){
+        fetch('/get_data')
+        .then(response => response.json())
+        .then(data => {
+            const dataTableBody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
+            dataTableBody.innerHTML = ''; // Clear existing rows
+
+            data.forEach(exercise => {
+                const row = dataTableBody.insertRow();
+                const idCell = row.insertCell(0);
+                const nameCell = row.insertCell(1);
+                const setsRepsCell = row.insertCell(2);
+                const dateCell = row.insertCell(3);
+
+                idCell.textContent = exercise.id;
+                nameCell.textContent = exercise.exercise_name;
+                setsRepsCell.textContent = exercise.sets_reps;
+                dateCell.textContent = exercise.date;
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching data:', error);
+        });
+    }
+
+</script>
+
+</body>
+</html>
