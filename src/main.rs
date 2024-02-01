@@ -1,8 +1,10 @@
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, post ,web, App, HttpResponse, HttpServer, Responder};
 use serde::{Serialize, Deserialize};
+use serde_json::json;
 use tera::Tera;
-use rusqlite::{Connection, Result};
+use rusqlite::{Connection, Result, params};
 use actix_files as fs;
+use actix_web::delete;
 use rusqlite::types::FromSql;
 use rusqlite::types::Value;
 use rusqlite::Row;
@@ -77,6 +79,33 @@ async fn get_data() -> impl Responder {
     HttpResponse::Ok().json(exercises)
 }
 
+// В вашем коде добавьте новый маршрут для обработки DELETE-запроса
+#[delete("/delete_exercise/{id}")]
+async fn delete_exercise(id: web::Path<i32>) -> HttpResponse {
+    // Ваш код для удаления упражнения с идентификатором id
+    if let Err(e) = delete_exercise_from_database(id.into_inner()).await {
+        // Обработка ошибки удаления, например, отправка 500 Internal Server Error
+        return HttpResponse::InternalServerError().body(format!("Failed to delete exercise: {}", e));
+    }
+
+    // Успешный ответ
+    HttpResponse::Ok().json(json!({"message": "Exercise deleted successfully"}))
+}
+
+// Функция для удаления упражнения из базы данных
+async fn delete_exercise_from_database(id: i32) -> Result<(), Box<dyn std::error::Error>> {
+    // Ваш код для удаления упражнения из базы данных
+    let conn = Connection::open("exercise_data.db")?;
+
+    conn.execute(
+        "DELETE FROM exercises WHERE id = ?",
+        params![id],
+    )?;
+
+    Ok(())
+}
+
+
 
 // Основная функция, инициализация сервера Actix
 #[actix_web::main]
@@ -94,6 +123,7 @@ async fn main() -> std::io::Result<()> {
             .service(save_to_sqlite_handler)
             .service(index)
             .service(get_data)
+            .service(delete_exercise)
                     // Обработка статических файлов
             .configure(|app| {
             app.service(fs::Files::new("/static", "static").show_files_listing());
