@@ -1,4 +1,4 @@
-use actix_web::{get, post ,web, App, HttpResponse, HttpServer, Responder};
+use actix_web::{get, post, put, web, App, HttpResponse, HttpServer, Responder};
 use serde::{Serialize, Deserialize};
 use serde_json::json;
 use tera::Tera;
@@ -22,7 +22,53 @@ struct Exercise {
     sets_reps: String, // option если придут NULL
     date: String,
 }
+#[derive(Deserialize, Serialize)]
+struct UpdatedExercise {
+    exercise_name: String,
+    sets_reps: String,
+    date: String,
+}
 
+// Функция для обновления упражнения в базе данных
+fn update_exercise_in_database(
+    exercise_id: i32,
+    updated_data: &UpdatedExercise,
+) -> Result<(), Box<dyn std::error::Error>> {
+    // Ваш код для обновления упражнения в базе данных
+    // Например, используйте Rusqlite для выполнения SQL-запроса
+    // Ниже приведен пример кода для иллюстрации
+    // Замените его на свою реализацию
+
+    let conn = rusqlite::Connection::open("exercise_data.db")?;
+    let sets_reps_json = serde_json::to_string(&updated_data.sets_reps)?;
+
+    conn.execute(
+        "UPDATE exercises SET exercise_name = ?, sets_reps = ?, date = ? WHERE id = ?",
+        &[
+            &updated_data.exercise_name,
+            &sets_reps_json,
+            &updated_data.date,
+            &exercise_id.to_string(),
+        ],
+    )?;
+
+    Ok(())
+}
+
+#[put("/update_exercise/{id}")]
+async fn update_exercise( data: web::Json<UpdatedExercise>, path: web::Path<i32>,) -> HttpResponse {
+    let exercise_id = path.into_inner();
+    let updated_data = data.into_inner();
+
+    // Вызов функции для обновления данных в базе данных
+    if let Err(e) = update_exercise_in_database(exercise_id, &updated_data) {
+        // Обработка ошибки, например, отправка 500 Internal Server Error
+        return HttpResponse::InternalServerError().body(format!("Failed to update exercise: {}", e));
+    }
+
+    // Успешный ответ
+    HttpResponse::Ok().json(json!({"message": "Exercise updated successfully"}))
+}
 
 // Обработчик для GET-запроса на "/"
 #[get("/")]
@@ -124,6 +170,7 @@ async fn main() -> std::io::Result<()> {
             .service(index)
             .service(get_data)
             .service(delete_exercise)
+            .service(update_exercise)
                     // Обработка статических файлов
             .configure(|app| {
             app.service(fs::Files::new("/static", "static").show_files_listing());
@@ -163,6 +210,7 @@ fn save_to_sqlite(data: &str) -> Result<(), Box<dyn std::error::Error>> {
         &[&exercise_data.exercise_name, &sets_reps_json, &exercise_data.date],
     )?;
     println!("save_to_sqlite: {}", data);
+
      Ok(())
 
     

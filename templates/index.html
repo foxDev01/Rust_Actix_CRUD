@@ -143,6 +143,7 @@
         .then(response => response.text())
         .then(text => alert(text))
         .catch(error => console.error('Error:', error));
+        getFromSQLite();
     } else {
         console.error('One or more elements not found');
     }
@@ -287,6 +288,7 @@ function showEditForm(exercise) {
 }
 
 function hideEditForm(exercise) {
+    
     const nameCell = document.querySelector(`#data-table td[data-id='${exercise.id}'][data-field='name']`);
     const setsRepsCell = document.querySelector(`#data-table td[data-id='${exercise.id}'][data-field='setsReps']`);
     const dateCell = document.querySelector(`#data-table td[data-id='${exercise.id}'][data-field='date']`);
@@ -317,17 +319,39 @@ function hideEditForm(exercise) {
 
 }
 
-function updateExercise(exercise) {
-    // Добавьте код для отправки данных на сервер и обновления строки в таблице
-    // ...
+async function updateExercise(exercise) {
+    // Получаем данные из полей ввода
+    const exerciseId = exercise.id;
+    const updatedName = document.querySelector(`#data-table td[data-id="${exerciseId}"][data-field="name"] input`).value;
+    const updatedSetsReps = document.querySelector(`#data-table td[data-id="${exerciseId}"][data-field="setsReps"] input`).value;
+    const updatedDate = document.querySelector(`#data-table td[data-id="${exerciseId}"][data-field="date"] input`).value;
 
-    console.log('Exercise updated successfully.');
+    // Создаем объект с обновленными данными
+    const updatedData = {
+        id: exerciseId,
+        exercise_name: updatedName,
+        sets_reps: updatedSetsReps,
+        date: updatedDate
+    };
+    console.log(updatedData);
+    // Отправляем PUT-запрос на сервер
+    const response = await fetch(`/update_exercise/${exerciseId}`, {
+        method: 'PUT',
+        body: JSON.stringify(updatedData),
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
 
-    hideEditForm(exercise); // Скрыть форму после обновления
-    // Здесь укажите id соответствующей строки, которую нужно отобразить
-    // document.getElementById(`exerciseRow${exerciseId}`).style.display = 'table-row';
-    getFromSQLite(); // Обновите таблицу после обновления
+    if (!response.ok) {
+        console.error('Error updating exercise:', response.status);
+        return;
+    }
+
+    // Обновляем таблицу после успешного обновления
+    getFromSQLite();
 }
+
 
 
 // Функция для удаления упражнения
