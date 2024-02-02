@@ -174,6 +174,9 @@ async function getFromSQLite() {
                 dateCell.dataset.id = exercise.id;
                 dateCell.dataset.field = 'date';
 
+                actionCell.dataset.id = exercise.id;
+                actionCell.dataset.field = 'action';
+
                 idCell.textContent = exercise.id;
                 // Создание div для значения и добавление в ячейку
                 const nameValueDiv = document.createElement('div');
@@ -190,7 +193,7 @@ async function getFromSQLite() {
 
                 // Добавление кнопок "Edit" и "Delete"
                 const actionButtonsDiv = document.createElement('div');
-                actionButtonsDiv.classList.add('actionButtons');
+                actionButtonsDiv.dataset.field = 'actionButtons';
 
                 const editButton = document.createElement('button');
                 editButton.textContent = 'Edit';
@@ -230,7 +233,7 @@ async function getFromSQLite() {
 
 
                 const editButtonsDiv = document.createElement('div');
-                editButtonsDiv.classList.add('editButtons');
+                editButtonsDiv.dataset.field = 'editButtons';
                 editButtonsDiv.style.display = 'none';
                 const saveButton = document.createElement('button');
                 saveButton.textContent = 'Save';
@@ -279,10 +282,10 @@ function showEditForm(exercise) {
     divSetsReps.style.display = 'none';
     divDate.style.display = 'none';
 
-    const divButtonsEdit = document.querySelector('.editButtons');
+    const divButtonsEdit = document.querySelector(`#data-table td[data-id='${exercise.id}'] div[data-field="editButtons"]`);
     divButtonsEdit.style.display = 'block';
 
-    const divActionsButtons = document.querySelector('.actionButtons');
+    const divActionsButtons = document.querySelector(`#data-table td[data-id='${exercise.id}'] div[data-field="actionButtons"]`);
     divActionsButtons.style.display = 'none';
 
 }
@@ -309,10 +312,10 @@ function hideEditForm(exercise) {
     divSetsReps.style.display = 'block';
     divDate.style.display = 'block';
 
-    const divButtonsEdit = document.querySelector('.editButtons');
+    const divButtonsEdit = document.querySelector(`#data-table td[data-id='${exercise.id}'] div[data-field="editButtons"]`);
     divButtonsEdit.style.display = 'none';
 
-    const divActionsButtons = document.querySelector('.actionButtons');
+    const divActionsButtons = document.querySelector(`#data-table td[data-id='${exercise.id}'] div[data-field="actionButtons"]`);
     divActionsButtons.style.display = 'block';
 
 
@@ -323,7 +326,7 @@ async function updateExercise(exercise) {
     // Получаем данные из полей ввода
     const exerciseId = exercise.id;
     const updatedName = document.querySelector(`#data-table td[data-id="${exerciseId}"][data-field="name"] input`).value;
-    const updatedSetsReps = document.querySelector(`#data-table td[data-id="${exerciseId}"][data-field="setsReps"] input`).value;
+    const updatedSetsReps = document.querySelector(`#data-table td[data-id="${exerciseId}"][data-field="setsReps"] input`).value.replace(/"/g, '');
     const updatedDate = document.querySelector(`#data-table td[data-id="${exerciseId}"][data-field="date"] input`).value;
 
     // Создаем объект с обновленными данными
@@ -333,7 +336,7 @@ async function updateExercise(exercise) {
         sets_reps: updatedSetsReps,
         date: updatedDate
     };
-    console.log(updatedData);
+    console.log(updatedData.sets_reps);
     // Отправляем PUT-запрос на сервер
     const response = await fetch(`/update_exercise/${exerciseId}`, {
         method: 'PUT',
