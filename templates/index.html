@@ -11,7 +11,7 @@
 
     <div>
 
-        <h1>SQLite Data</h1>
+        <h1>Журнал тренировок</h1>
     <table id="data-table">
         <thead>
             <tr>
@@ -104,7 +104,7 @@
             console.error('One or more elements not found');
         }
     }
-    async function saveToSQLite() {
+async function saveToSQLite() {
     var exerciseName = document.querySelector('input[name="exerciseName"]');
     var setWeight1 = document.querySelector('input[name="setWeight1"]');
     var setRepetitions1 = document.querySelector('input[name="setRepetitions1"]');
@@ -130,7 +130,7 @@
             sets_reps:  parseInt(setWeight1.value)+ "/" + parseInt(setRepetitions1.value) + "," +
                         parseInt(setWeight2.value)+ "/" + parseInt(setRepetitions2.value),
             
-            date: `${formattedDay}-${formattedMonth}-${year}` // You may need to dynamically set the date
+            date: `${formattedDay}-${formattedMonth}-${year}` 
         };
 
         fetch('/save_sqlite', {
@@ -142,7 +142,7 @@
         })
         .then(response => response.text())
         .then(text => alert(text))
-        .catch(error => console.error('Error:', error));
+        .catch(error => console.error('Ошибка:', error));
         getFromSQLite();
     } else {
         console.error('One or more elements not found');
@@ -347,7 +347,7 @@ async function updateExercise(exercise) {
     });
 
     if (!response.ok) {
-        console.error('Error updating exercise:', response.status);
+        console.error('Ошибка изменения:', response.status);
         return;
     }
 
@@ -372,12 +372,12 @@ function deleteExercise(exercise) {
             return response.json();
         })
         .then(data => {
-            console.log('Exercise deleted successfully:', data);
+            console.log('Удаление прошло успешно', data);
             // Выполните дополнительные действия, если необходимо
             getFromSQLite(); // Обновите таблицу после удаления
         })
         .catch(error => {
-            console.error('Error deleting exercise:', error);
+            console.error('Ошибка удаления', error);
         });
     }
 }
